@@ -1,6 +1,6 @@
 locals {
-  env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
-  iam_config = local.env.iam_config
+  env         = yamldecode(file("${path.module}/../../resource/environment.yaml"))
+  iam_config  = local.env.iam_config
   oidc_config = try(local.env.oidc_config, null)
 }
 
@@ -24,8 +24,8 @@ module "iam" {
 }
 
 module "oidc" {
-  count      = local.oidc_config != null ? 1 : 0
-  source     = "../../module/oidc"
+  count       = local.oidc_config != null ? 1 : 0
+  source      = "../../module/oidc"
   oidc_config = local.oidc_config
 }
 

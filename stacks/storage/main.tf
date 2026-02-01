@@ -1,13 +1,13 @@
 locals {
   env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
-  
+
   configs = {
-    s3 = try(local.env.s3_config, null)
-    kms = try(local.env.kms_config, null)
-    efs = try(local.env.efs_config, null)
-    ecr = try(local.env.ecr_config, null)
+    s3            = try(local.env.s3_config, null)
+    kms           = try(local.env.kms_config, null)
+    efs           = try(local.env.efs_config, null)
+    ecr           = try(local.env.ecr_config, null)
     observability = try(local.env.observability_config, null)
-    route53_acm = try(local.env.route53_acm_config, null)
+    route53_acm   = try(local.env.route53_acm_config, null)
   }
 }
 
@@ -44,8 +44,8 @@ module "efs" {
 }
 
 module "ecr" {
-  count     = local.configs.ecr != null && local.configs.ecr.enabled ? 1 : 0
-  source    = "../../module/ecr"
+  count      = local.configs.ecr != null && local.configs.ecr.enabled ? 1 : 0
+  source     = "../../module/ecr"
   ecr_config = local.configs.ecr
 }
 

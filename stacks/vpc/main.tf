@@ -1,5 +1,5 @@
 locals {
-  env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
+  env    = yamldecode(file("${path.module}/../../resource/environment.yaml"))
   config = local.env.vpc_config
 }
 

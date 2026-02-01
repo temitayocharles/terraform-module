@@ -1,14 +1,14 @@
 locals {
   env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
-  
+
   configs = {
-    ec2_cluster = try(local.env.ec2_cluster_config, null)
+    ec2_cluster     = try(local.env.ec2_cluster_config, null)
     nexus_sonarqube = try(local.env.nexus_sonarqube_config, null)
-    monitoring = try(local.env.monitoring_config, null)
-    ecs_fargate = try(local.env.ecs_fargate_config, null)
-    eks = try(local.env.eks_config, null)
-    alb = try(local.env.alb_config, null)
-    autoscaling = try(local.env.autoscaling_config, null)
+    monitoring      = try(local.env.monitoring_config, null)
+    ecs_fargate     = try(local.env.ecs_fargate_config, null)
+    eks             = try(local.env.eks_config, null)
+    alb             = try(local.env.alb_config, null)
+    autoscaling     = try(local.env.autoscaling_config, null)
   }
 }
 
@@ -51,8 +51,8 @@ module "ecs_fargate" {
 }
 
 module "eks" {
-  count              = local.configs.eks != null && local.configs.eks.enabled ? 1 : 0
-  source             = "../../module/eks-practice"
+  count               = local.configs.eks != null && local.configs.eks.enabled ? 1 : 0
+  source              = "../../module/eks-practice"
   eks_practice_config = local.configs.eks
 }
 

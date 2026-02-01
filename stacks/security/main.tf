@@ -1,8 +1,8 @@
 locals {
   env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
-  
+
   sg_configs = {
-    jenkins   = try(local.env.jenkins_sg_config, null)
+    jenkins    = try(local.env.jenkins_sg_config, null)
     k8s_master = try(local.env.k8s_master_sg_config, null)
     k8s_worker = try(local.env.k8s_worker_sg_config, null)
     tools      = try(local.env.tools_sg_config, null)

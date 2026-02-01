@@ -1,8 +1,8 @@
 locals {
   env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
-  
+
   configs = {
-    rds = try(local.env.rds_config, null)
+    rds             = try(local.env.rds_config, null)
     rotation_lambda = try(local.env.rotation_lambda_config, null)
   }
 }
@@ -28,8 +28,8 @@ module "rotation_lambda" {
 }
 
 module "rds" {
-  count      = local.configs.rds != null && local.configs.rds.enabled ? 1 : 0
-  source     = "../../module/rds"
+  count  = local.configs.rds != null && local.configs.rds.enabled ? 1 : 0
+  source = "../../module/rds"
   rds_config = merge(
     local.configs.rds,
     {
