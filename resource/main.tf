@@ -304,7 +304,15 @@ output "monitoring_sg_id" { value = length(module.monitoring_sg) > 0 ? module.mo
 module "ec2_cluster" {
   count  = lookup(local.env_modules, "ec2_cluster", false) ? 1 : 0
   source = "../module/ec2-cluster"
-  ec2_cluster_config = local.env.ec2_cluster_config
+  ec2_cluster_config = merge(
+    local.env.ec2_cluster_config,
+    {
+      vpc_security_group_ids = concat(
+        length(module.k8s_master_sg) > 0 ? [module.k8s_master_sg[0].security_group_id] : [],
+        length(module.k8s_worker_sg) > 0 ? [module.k8s_worker_sg[0].security_group_id] : []
+      )
+    }
+  )
 }
 
 module "nexus_sonarqube" {
@@ -361,11 +369,13 @@ module "ecs_fargate_practice" {
     enabled            = true
     name               = "${local.env.project_config.name}-ecs-practice"
     subnet_ids         = [local.final_subnet_id]
-    security_group_ids = []
+    security_group_ids = length(module.tools_sg) > 0 ? [module.tools_sg[0].security_group_id] : []
     container_image    = lookup(local.env, "ecs_image", "nginx:stable-alpine")
     cpu                = lookup(local.env, "ecs_cpu", 256)
     memory             = lookup(local.env, "ecs_memory", 512)
     desired_count      = lookup(local.env, "ecs_desired_count", 1)
+    target_group_arn   = length(module.alb) > 0 ? module.alb[0].target_group_arn : ""
+    container_port     = lookup(local.env, "ecs_container_port", 80)
   }
 }
 
@@ -462,10 +472,10 @@ module "alb" {
     name                = "${local.env.project_config.name}-alb"
     vpc_id              = local.final_vpc_id
     subnet_ids          = [local.final_subnet_id]
-    security_group_ids  = []
-    health_check_path   = "/" # TODO: update as needed
-    port                = 80   # TODO: update as needed
-    target_instance_ids = []   # TODO: update as needed
+    security_group_ids  = length(module.tools_sg) > 0 ? [module.tools_sg[0].security_group_id] : []
+    health_check_path   = lookup(local.env, "alb_health_check_path", "/")
+    port                = lookup(local.env, "alb_port", 80)
+    target_instance_ids = length(module.ec2_cluster) > 0 ? concat(module.ec2_cluster[0].master_instance_ids, module.ec2_cluster[0].worker_instance_ids) : []
   }
 }
 
@@ -478,15 +488,15 @@ module "autoscaling" {
     ami                  = local.env.ami_config.id
     instance_type        = local.env.instance_types.worker
     subnet_ids           = [local.final_subnet_id]
-    security_group_ids   = [] # TODO: update as needed
-    key_name             = "" # TODO: update as needed
-    user_data            = "" # TODO: update as needed
-    iam_instance_profile = local.iam_jenkins_profile != null ? local.iam_jenkins_profile : "" # TODO: update as needed
+    security_group_ids   = length(module.k8s_worker_sg) > 0 ? [module.k8s_worker_sg[0].security_group_id] : []
+    key_name             = local.env.ssh_config.key_name
+    user_data            = lookup(local.env, "asg_user_data", file("../scripts/k8s-worker-setup.sh"))
+    iam_instance_profile = local.iam_jenkins_profile != null ? local.iam_jenkins_profile : ""
     target_group_arns    = length(module.alb) > 0 ? [module.alb[0].target_group_arn] : []
-    create_iam_profile   = false # TODO: update as needed
-    min_size             = 1 # TODO: update as needed
-    max_size             = 2 # TODO: update as needed
-    desired_capacity     = 1 # TODO: update as needed
+    create_iam_profile   = false
+    min_size             = lookup(local.env, "asg_min_size", 1)
+    max_size             = lookup(local.env, "asg_max_size", 3)
+    desired_capacity     = lookup(local.env, "asg_desired_capacity", 2)
   }
 }
 
@@ -495,24 +505,24 @@ module "rds" {
   source = "../module/rds"
   rds_config = {
     enabled                           = true
-    engine                            = "postgres"
-    engine_version                    = "13"
-    instance_class                    = "db.t3.micro" # TODO: update as needed
-    allocated_storage                 = 20 # TODO: update as needed
+    engine                            = lookup(local.env.rds_config, "engine", "postgres")
+    engine_version                    = lookup(local.env.rds_config, "engine_version", "13")
+    instance_class                    = lookup(local.env.rds_config, "instance_class", "db.t3.micro")
+    allocated_storage                 = lookup(local.env.rds_config, "allocated_storage", 20)
     subnet_ids                        = [local.final_subnet_id]
-    security_group_ids                = [] # TODO: update as needed
-    allowed_source_cidr               = ["0.0.0.0/0"] # TODO: update as needed
-    allowed_source_security_group_ids = [] # TODO: update as needed
+    security_group_ids                = length(module.tools_sg) > 0 ? [module.tools_sg[0].security_group_id] : []
+    allowed_source_cidr               = lookup(local.env.rds_config, "allowed_source_cidr", [])
+    allowed_source_security_group_ids = length(module.k8s_master_sg) > 0 ? [module.k8s_master_sg[0].security_group_id] : []
     rotation_lambda_arn               = length(module.rotation_lambda) > 0 ? module.rotation_lambda[0].lambda_arn : ""
-    rotation_days                     = 30 # TODO: update as needed
+    rotation_days                     = lookup(local.env.rds_config, "rotation_days", 30)
     vpc_id                            = local.final_vpc_id
-    require_vpc_for_sg                = true # TODO: update as needed
-    username                          = "admin" # TODO: update as needed
-    password                          = "password" # TODO: update as needed
-    create_secret                     = false # TODO: update as needed
-    secret_name                       = "" # TODO: update as needed
-    db_name                           = "musicvibe" # TODO: update as needed
-    skip_final_snapshot               = true # TODO: update as needed
+    require_vpc_for_sg                = true
+    username                          = lookup(local.env.rds_config, "username", "dbadmin")
+    password                          = lookup(local.env.rds_config, "password", "changeme")
+    create_secret                     = lookup(local.env.rds_config, "create_secret", true)
+    secret_name                       = lookup(local.env.rds_config, "secret_name", "${local.env.project_config.name}-rds-secret")
+    db_name                           = lookup(local.env.rds_config, "db_name", "appdb")
+    skip_final_snapshot               = lookup(local.env.rds_config, "skip_final_snapshot", true)
   }
 }
 

@@ -58,4 +58,13 @@ resource "aws_ecs_service" "this" {
     security_groups  = var.ecs_fargate_config.security_group_ids
     assign_public_ip = true
   }
+
+  # Optional: Connect to ALB if target_group_arn is provided
+  load_balancer {
+    target_group_arn = var.ecs_fargate_config.target_group_arn
+    container_name   = "practice"
+    container_port   = var.ecs_fargate_config.container_port
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.task_exec_attach]
 }

@@ -10,6 +10,8 @@ container_image: Docker image to deploy (e.g., 'nginx:stable-alpine').
 cpu: CPU units to allocate per task (e.g., 256, 512).
 memory: Memory (in MB) to allocate per task (e.g., 512, 1024).
 desired_count: Number of ECS tasks to run.
+target_group_arn: Optional ALB target group ARN for load balancing.
+container_port: Container port to expose (default: 80).
 DESC
   type = object({
     enabled            = bool
@@ -20,5 +22,7 @@ DESC
     cpu                = number
     memory             = number
     desired_count      = number
+    target_group_arn   = optional(string, "")
+    container_port     = optional(number, 80)
   })
 }
