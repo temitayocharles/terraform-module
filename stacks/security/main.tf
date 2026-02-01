@@ -1,0 +1,75 @@
+locals {
+  env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
+  
+  sg_configs = {
+    jenkins   = try(local.env.jenkins_sg_config, null)
+    k8s_master = try(local.env.k8s_master_sg_config, null)
+    k8s_worker = try(local.env.k8s_worker_sg_config, null)
+    tools      = try(local.env.tools_sg_config, null)
+    monitoring = try(local.env.monitoring_sg_config, null)
+  }
+}
+
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = local.env.aws_config.region
+}
+
+module "jenkins_sg" {
+  count             = local.sg_configs.jenkins != null ? 1 : 0
+  source            = "../../module/sg-dynamic"
+  sg_dynamic_config = local.sg_configs.jenkins
+}
+
+module "k8s_master_sg" {
+  count             = local.sg_configs.k8s_master != null ? 1 : 0
+  source            = "../../module/sg-dynamic"
+  sg_dynamic_config = local.sg_configs.k8s_master
+}
+
+module "k8s_worker_sg" {
+  count             = local.sg_configs.k8s_worker != null ? 1 : 0
+  source            = "../../module/sg-dynamic"
+  sg_dynamic_config = local.sg_configs.k8s_worker
+}
+
+module "tools_sg" {
+  count             = local.sg_configs.tools != null ? 1 : 0
+  source            = "../../module/sg-dynamic"
+  sg_dynamic_config = local.sg_configs.tools
+}
+
+module "monitoring_sg" {
+  count             = local.sg_configs.monitoring != null ? 1 : 0
+  source            = "../../module/sg-dynamic"
+  sg_dynamic_config = local.sg_configs.monitoring
+}
+
+output "jenkins_sg_id" {
+  value = try(module.jenkins_sg[0].security_group_id, "")
+}
+
+output "k8s_master_sg_id" {
+  value = try(module.k8s_master_sg[0].security_group_id, "")
+}
+
+output "k8s_worker_sg_id" {
+  value = try(module.k8s_worker_sg[0].security_group_id, "")
+}
+
+output "tools_sg_id" {
+  value = try(module.tools_sg[0].security_group_id, "")
+}
+
+output "monitoring_sg_id" {
+  value = try(module.monitoring_sg[0].security_group_id, "")
+}

@@ -1,7 +1,14 @@
 terraform {
-  backend "s3" {
-    bucket         = "charlie-dev12212025"
-    key            = "state/terraform.tfstate"
-    dynamodb_table = "charlie-dev12212025"
+  required_version = ">= 1.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 }
+
+locals {
+  backend_config = lookup(local.env, "terraform_backend", null)
+}
+
