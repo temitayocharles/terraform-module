@@ -1,101 +1,76 @@
-
 aws_config:
-  region: "us-east-1"  # User-defined: AWS region for all resources
+  region: "us-east-1"
 
 ami_config:
-  id: "ami-0360c520857e3138f"  # User-defined: AMI ID for EC2 instances
+  id: "ami-0360c520857e3138f"
 
 ssh_config:
-  key_name: "k8s-pipeline-key"  # User-defined: SSH key name
+  key_name: "k8s-pipeline-key"
   allowed_cidr:
-    - "0.0.0.0/0"  # User-defined: Allowed CIDR blocks for SSH
+    - "0.0.0.0/0"
 
 instance_types:
-  master: "t3.medium"  # User-defined: Master node type
-  worker: "t3.medium"  # User-defined: Worker node type
-  monitoring: "t3.medium"  # User-defined: Monitoring node type
+  master: "t3.medium"
+  worker: "t3.medium"
+  monitoring: "t3.medium"
 
 project_config:
-  name: "ultimate-cicd-devops"  # User-defined: Project name
-  environment: "dev"  # User-defined: Environment name
+  name: "ultimate-cicd-devops"
+  environment: "dev"
 
 feature_flags:
-  enable_monitoring_instance: true  # Toggle: Enable monitoring instance
-  enable_tools_instance: true  # Toggle: Enable tools instance
-  enable_worker_2: false  # Toggle: Enable second worker node
+  enable_monitoring_instance: true
+  enable_tools_instance: true
+  enable_worker_2: false
 
-# Optional: remote_state pointers for discovery
 remote_state:
   vpc:
-    bucket: "charlie-dev12212025"  # Used for auto-populating VPC outputs
-    key: "vpc/state.tfstate"  # Remote state key
-    region: "us-east-1"  # Remote state region
+    bucket: "charlie-dev12212025"
+    key: "vpc/state.tfstate"
+    region: "us-east-1"
 
-# OIDC providers: list of repos/orgs to create roles for. Each item creates a role.
 oidc_providers:
-  - name: "gha-ultimate-pipeline"  # User-defined: OIDC provider name
-    github_org: "temitayocharles"  # User-defined: GitHub org
-    github_repo: "ultimate-pipeline"  # User-defined: GitHub repo
+  - name: "gha-ultimate-pipeline"
+    github_org: "temitayocharles"
+    github_repo: "ultimate-pipeline"
     audiences:
-      - "sts.amazonaws.com"  # Usually static for AWS OIDC
+      - "sts.amazonaws.com"
 
-# Module toggles: set false to disable creating that module
 modules:
-  # Toggle modules on/off (user-defined)
   jenkins_sg: true
   k8s_master_sg: true
   k8s_worker_sg: true
   tools_sg: true
   monitoring_sg: true
-
   jenkins_k8s_master: true
   k8s_worker_1: true
   k8s_worker_2: true
   nexus_sonarqube: true
   monitoring: true
-
   ecs_fargate: false
   eks_practice: false
-  # The following config blocks are auto-wired to modules if enabled
-  # module: ecs_fargate
   ecs_fargate_config:
   vpc: false
-  # module: kms_secrets
   kms_secrets_config:
   alb: false
-  # module: autoscaling
   autoscaling_config:
   rds: false
-  # module: iam
   iam_config:
   kms_secrets: false
-  # module: eks_practice
   eks_practice_config:
   route53_acm: false
-  # module: rds
   rds_config:
-
-  # module: observability
   observability_config:
-  ecs_image: "nginx:stable-alpine"  # Example image, can be overridden
-  # module: efs
+  ecs_image: "nginx:stable-alpine"
   efs_config:
-  ecs_memory: 512  # Example memory, can be overridden
-  # module: ecr
+  ecs_memory: 512
   ecr_config:
-
-  # module: alb
   alb_config:
-  eks_version: "1.27"  # Example version, can be overridden
-  # module: vpc
+  eks_version: "1.27"
   vpc_config:
   iam_names:
-    # module: s3
     s3_config:
-    jenkins_profile_name: "ultimate-cicd-devops-jenkins-profile"  # Example profile name
-  # module: oidc
-
-  # module: route53_acm
+    jenkins_profile_name: "ultimate-cicd-devops-jenkins-profile"
     route53_acm_config:
       github_org: "temitayocharles"
       github_repo: "ultimate-pipeline"
@@ -104,148 +79,131 @@ modules:
 
 iam_config:
   project_config:
-    name: "ultimate-cicd-devops"  # User-defined
-    environment: "dev"  # User-defined
-  enable_instance_profiles: true  # Toggle: create instance profiles
+    name: "ultimate-cicd-devops"
+    environment: "dev"
+  enable_instance_profiles: true
   names:
-    jenkins_role_name: "ultimate-cicd-devops-jenkins-role"  # Generated or user-defined
-    jenkins_profile_name: "ultimate-cicd-devops-jenkins-profile"  # Generated or user-defined
+    jenkins_role_name: "ultimate-cicd-devops-jenkins-role"
+    jenkins_profile_name: "ultimate-cicd-devops-jenkins-profile"
 
-# VPC module example
 vpc_config:
-  enabled: false  # Toggle: enable VPC module
+  enabled: false
   project_config:
-    name: "ultimate-cicd-devops"  # User-defined
-    environment: "dev"  # User-defined
-  cidr: "10.0.0.0/16"  # User-defined: VPC CIDR
+    name: "ultimate-cicd-devops"
+    environment: "dev"
+  cidr: "10.0.0.0/16"
 
-# ECR module example
 ecr_config:
-  enabled: false  # Toggle: enable ECR module
-  name: "ultimate-cicd-devops-ecr"  # User-defined or generated
+  enabled: false
+  name: "ultimate-cicd-devops-ecr"
 
-# ALB module example
 alb_config:
-  enabled: false  # Toggle: enable ALB module
-  name: "ultimate-cicd-devops-alb"  # User-defined or generated
-  subnet_ids: []  # Auto-populated from VPC module or remote_state
-  security_group_ids: []  # Auto-populated from SG modules or remote_state
+  enabled: false
+  name: "ultimate-cicd-devops-alb"
+  subnet_ids: []
+  security_group_ids: []
 
-# Autoscaling example
 autoscaling_config:
-  enabled: false  # Toggle: enable autoscaling
-  name: "ultimate-cicd-devops-asg"  # User-defined or generated
-  ami: "ami-0360c520857e3138f"  # User-defined or discovered
-  instance_type: "t3.medium"  # User-defined
-  subnet_ids: []  # Auto-populated from VPC module or remote_state
-  target_group_arns: []  # Auto-populated from ALB module if used
+  enabled: false
+  name: "ultimate-cicd-devops-asg"
+  ami: "ami-0360c520857e3138f"
+  instance_type: "t3.medium"
+  subnet_ids: []
+  target_group_arns: []
 
-# RDS example
 rds_config:
-  enabled: false  # Toggle: enable RDS module
-  engine: "postgres"  # User-defined
-  engine_version: "13"  # User-defined
-  subnet_ids: []  # Auto-populated from VPC module or remote_state
-  vpc_id: ""  # Auto-populated from VPC module or remote_state
-  rotation_lambda_arn: ""  # Auto-populated if rotation lambda enabled
-  # optional DB settings
-  db_name: "appdb"  # User-defined
-  username: "dbuser"  # User-defined
-  password: "changeme"  # User-defined (should be managed securely)
+  enabled: false
+  engine: "postgres"
+  engine_version: "13"
+  subnet_ids: []
+  vpc_id: ""
+  rotation_lambda_arn: ""
+  db_name: "appdb"
+  username: "dbuser"
+  password: "changeme"
 
-# Rotation lambda example
 rotation_lambda_config:
-  enabled: false  # Toggle: enable rotation lambda
-  name: "ultimate-cicd-devops-rds-rotation"  # User-defined or generated
+  enabled: false
+  name: "ultimate-cicd-devops-rds-rotation"
 
-# S3 example
 s3_config:
-  enabled: false  # Toggle: enable S3 module
-  bucket_name: "ultimate-cicd-devops-dev-bucket"  # User-defined or generated
-  versioning: false  # Toggle: enable versioning
-  acl: "private"  # User-defined
-  force_destroy: false  # Toggle: allow force destroy
+  enabled: false
+  bucket_name: "ultimate-cicd-devops-dev-bucket"
+  versioning: false
+  acl: "private"
+  force_destroy: false
 
-# KMS / secrets example
 kms_secrets_config:
-  enabled: false  # Toggle: enable KMS module
-  name: "ultimate-cicd-devops-kms"  # User-defined or generated
+  enabled: false
+  name: "ultimate-cicd-devops-kms"
 
-# Observability example
 observability_config:
-  enabled: false  # Toggle: enable observability
-  log_group_prefix: "ultimate-cicd-devops"  # User-defined or generated
+  enabled: false
+  log_group_prefix: "ultimate-cicd-devops"
 
-# Route53 / ACM example
 route53_acm_config:
-  enabled: false  # Toggle: enable Route53/ACM
-  domain_name: ""  # User-defined
-  hosted_zone_id: ""  # Auto-populated from Route53 module or remote_state
+  enabled: false
+  domain_name: ""
+  hosted_zone_id: ""
 
-# EFS example
 efs_config:
-  enabled: false  # Toggle: enable EFS module
-  subnet_ids: []  # Auto-populated from VPC module or remote_state
+  enabled: false
+  subnet_ids: []
 
-# ECS Fargate example
 ecs_fargate_config:
-  enabled: false  # Toggle: enable ECS Fargate
-  name: "ultimate-cicd-devops-ecs"  # User-defined or generated
-  subnet_ids: []  # Auto-populated from VPC module or remote_state
-  security_group_ids: []  # Auto-populated from SG modules or remote_state
-  container_image: "nginx:stable-alpine"  # User-defined or templated
-  cpu: 256  # User-defined
-  memory: 512  # User-defined
-  desired_count: 1  # User-defined
+  enabled: false
+  name: "ultimate-cicd-devops-ecs"
+  subnet_ids: []
+  security_group_ids: []
+  container_image: "nginx:stable-alpine"
+  cpu: 256
+  memory: 512
+  desired_count: 1
 
-# EKS practice example
 eks_practice_config:
-  enabled: false  # Toggle: enable EKS module
-  name: "ultimate-cicd-devops-eks"  # User-defined or generated
-  subnet_ids: []  # Auto-populated from VPC module or remote_state
+  enabled: false
+  name: "ultimate-cicd-devops-eks"
+  subnet_ids: []
 
-# EC2 instance example (module/ec2-instance expects an object)
 ec2_instance_config:
-  instance_count: 1  # User-defined
-  ami: "ami-0360c520857e3138f"  # User-defined or discovered
-  instance_type: "t3.medium"  # User-defined
-  key_name: "k8s-pipeline-key"  # User-defined
-  subnet_id: ""  # Auto-populated from VPC module or remote_state
-  vpc_security_group_ids: []  # Auto-populated from SG modules or remote_state
-  iam_instance_profile: ""  # Auto-populated from IAM module if enabled
+  instance_count: 1
+  ami: "ami-0360c520857e3138f"
+  instance_type: "t3.medium"
+  key_name: "k8s-pipeline-key"
+  subnet_id: ""
+  vpc_security_group_ids: []
+  iam_instance_profile: ""
   root_block_device:
-    volume_size: 20  # User-defined
-    volume_type: "gp3"  # User-defined
-  user_data: ""  # User-defined or templated
+    volume_size: 20
+    volume_type: "gp3"
+  user_data: ""
   tags:
-    Name: "ultimate-cicd-devops-instance"  # User-defined or generated
+    Name: "ultimate-cicd-devops-instance"
 
-# EC2 cluster example (module/ec2-cluster expects an object)
 ec2_cluster_config:
-  enabled: true  # Set to false to disable EC2 cluster module
-  master_count: 1  # Number of master nodes (user-defined)
-  worker_count: 2  # Number of worker nodes (user-defined)
-  ami: "ami-0360c520857e3138f"  # AMI ID (user-defined or discovered)
-  master_instance_type: "t3.medium"  # Master node type
-  worker_instance_type: "t3.medium"  # Worker node type
-  key_name: "k8s-pipeline-key"  # SSH key name (user-defined)
-  subnet_id: ""  # Will be auto-populated from VPC module if remote_state is used
-  vpc_security_group_ids: []  # Will be auto-populated from SG modules or remote_state
-  iam_instance_profile: "ultimate-cicd-devops-profile"  # Can be generated by IAM module
-  master_user_data: "${file(../scripts/jenkins-k8s-master-setup.sh)}"  # Path to master setup script
-  worker_user_data: "${file(../scripts/k8s-worker-setup.sh)}"  # Path to worker setup script
+  enabled: true
+  master_count: 1
+  worker_count: 2
+  ami: "ami-0360c520857e3138f"
+  master_instance_type: "t3.medium"
+  worker_instance_type: "t3.medium"
+  key_name: "k8s-pipeline-key"
+  subnet_id: ""
+  vpc_security_group_ids: []
+  iam_instance_profile: "ultimate-cicd-devops-profile"
+  master_user_data: "${file(../scripts/jenkins-k8s-master-setup.sh)}"
+  worker_user_data: "${file(../scripts/k8s-worker-setup.sh)}"
   tags:
-    Project: "ultimate-cicd-devops"  # Project tag (user-defined)
-    Environment: "dev"  # Environment tag (user-defined)
+    Project: "ultimate-cicd-devops"
+    Environment: "dev"
 
-# SG dynamic example (single SG object schema)
 sg_dynamic_example:
-  vpc_id: ""  # Will be auto-populated from VPC module if remote_state is used
-  create_before_destroy: false  # Set to true for zero-downtime SG replacement
+  vpc_id: ""
+  create_before_destroy: false
   config:
-    security_group_name: ""  # User-defined or generated by module
-    security_group_description: ""  # User-defined
-    tags: {}  # Optional tags
-    allow_all: false  # Set true to allow all traffic (not recommended)
-    inbound_rules: []  # List of inbound rules (user-defined or templated)
-    outbound_rules: []  # List of outbound rules (user-defined or templated)
+    security_group_name: ""
+    security_group_description: ""
+    tags: {}
+    allow_all: false
+    inbound_rules: []
+    outbound_rules: []
