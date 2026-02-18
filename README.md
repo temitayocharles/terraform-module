@@ -55,3 +55,8 @@ GitHub Actions workflow is at [`/.github/workflows/terraform-ci.yml`](./.github/
 ## Module References
 Each module has its own README under [`module/`](./module).
 
+
+
+## Architecture Maps
+- [DEPENDENCY_LADDER.md](./DEPENDENCY_LADDER.md)
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
