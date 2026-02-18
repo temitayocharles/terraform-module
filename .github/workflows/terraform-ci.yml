@@ -44,6 +44,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare environment file for tflint
+        run: cp resource/environment.yaml.template resource/environment.yaml
+
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
 
