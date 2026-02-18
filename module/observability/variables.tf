@@ -6,7 +6,7 @@ enabled: Set to true to enable creation of observability resources (e.g., CloudW
 log_group_prefix: Prefix for CloudWatch log group names. Used for resource naming and tagging.
 DESC
   type = object({
-    enabled           = bool
-    log_group_prefix  = string
+    enabled          = bool
+    log_group_prefix = string
   })
 }

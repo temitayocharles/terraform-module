@@ -17,18 +17,18 @@ worker_user_data: User data script for worker nodes (can be templated or file re
 tags: Map of tags to apply to all cluster instances (e.g., project, environment).
 DESC
   type = object({
-    enabled         = bool
-    master_count    = number
-    worker_count    = number
-    ami             = string
-    master_instance_type = string
-    worker_instance_type = string
-    key_name        = string
-    subnet_id       = string
+    enabled                = bool
+    master_count           = number
+    worker_count           = number
+    ami                    = string
+    master_instance_type   = string
+    worker_instance_type   = string
+    key_name               = string
+    subnet_id              = string
     vpc_security_group_ids = list(string)
     iam_instance_profile   = string
-    master_user_data = string
-    worker_user_data = string
-    tags            = map(string)
+    master_user_data       = string
+    worker_user_data       = string
+    tags                   = map(string)
   })
 }

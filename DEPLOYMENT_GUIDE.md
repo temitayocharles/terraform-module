@@ -1,5 +1,7 @@
 # Terraform Module Deployment Guide
 
+See [`START_HERE.md`](./START_HERE.md) for the canonical quick-start path.
+
 ## Architecture
 
 This Terraform module uses a **stack-based deployment system** allowing independent deployment of infrastructure components without requiring all modules to be enabled simultaneously.

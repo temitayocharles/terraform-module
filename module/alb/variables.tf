@@ -10,6 +10,7 @@ DESC
   type = object({
     enabled             = bool
     name                = string
+    vpc_id              = optional(string, "")
     subnet_ids          = list(string)
     security_group_ids  = list(string)
     health_check_path   = string

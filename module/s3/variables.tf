@@ -10,9 +10,9 @@ acl: Access control list for the bucket (e.g., 'private', 'public-read').
 force_destroy: If true, allows the bucket to be destroyed even if it contains objects (use with caution).
 DESC
   type = object({
-    enabled     = bool
-    bucket_name = string
-    versioning  = bool
+    enabled       = bool
+    bucket_name   = string
+    versioning    = bool
     acl           = string
     force_destroy = bool
   })

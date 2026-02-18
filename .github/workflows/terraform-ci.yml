@@ -1,0 +1,54 @@
+name: Terraform CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: fmt + validate stacks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Prepare environment file
+        run: cp resource/environment.yaml.template resource/environment.yaml
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Validate stacks
+        run: |
+          set -euo pipefail
+          for d in stacks/*; do
+            echo "Validating $d"
+            terraform -chdir="$d" init -backend=false
+            terraform -chdir="$d" validate
+          done
+
+  tflint:
+    name: tflint (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Run TFLint
+        run: |
+          set -euo pipefail
+          tflint --init
+          tflint -f compact --recursive

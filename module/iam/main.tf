@@ -31,7 +31,7 @@ resource "aws_iam_role_policy_attachment" "jenkins_ssm" {
 resource "aws_iam_role_policy" "jenkins_ecr" {
   count = var.iam_config.enable_instance_profiles ? 1 : 0
 
-    name = lookup(var.iam_config.names, "jenkins_ecr_policy_name", "${var.iam_config.project_config.name}-jenkins-ecr")
+  name = lookup(var.iam_config.names, "jenkins_ecr_policy_name", "${var.iam_config.project_config.name}-jenkins-ecr")
   role = aws_iam_role.jenkins_k8s_master[0].id
 
   policy = jsonencode({

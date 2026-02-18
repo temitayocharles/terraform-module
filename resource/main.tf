@@ -13,7 +13,7 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.6.0, < 2.0.0"
 
   required_providers {
     aws = {
@@ -438,8 +438,8 @@ output "ssh_commands" {
   value = {
     ec2_cluster_masters = length(module.ec2_cluster) > 0 && length(module.ec2_cluster[0].master_public_ips) > 0 ? [for ip in module.ec2_cluster[0].master_public_ips : "ssh -i ${local.env.ssh_config.key_name}.pem ubuntu@${ip}"] : []
     ec2_cluster_workers = length(module.ec2_cluster) > 0 && length(module.ec2_cluster[0].worker_public_ips) > 0 ? [for ip in module.ec2_cluster[0].worker_public_ips : "ssh -i ${local.env.ssh_config.key_name}.pem ubuntu@${ip}"] : []
-    nexus_sonarqube    = length(module.nexus_sonarqube) > 0 && length(module.nexus_sonarqube[0].public_ips) > 0 ? "ssh -i ${local.env.ssh_config.key_name}.pem ubuntu@${module.nexus_sonarqube[0].public_ips[0]}" : "Not created"
-    monitoring         = length(module.monitoring) > 0 && length(module.monitoring[0].public_ips) > 0 ? "ssh -i ${local.env.ssh_config.key_name}.pem ubuntu@${module.monitoring[0].public_ips[0]}" : "Not created"
+    nexus_sonarqube     = length(module.nexus_sonarqube) > 0 && length(module.nexus_sonarqube[0].public_ips) > 0 ? "ssh -i ${local.env.ssh_config.key_name}.pem ubuntu@${module.nexus_sonarqube[0].public_ips[0]}" : "Not created"
+    monitoring          = length(module.monitoring) > 0 && length(module.monitoring[0].public_ips) > 0 ? "ssh -i ${local.env.ssh_config.key_name}.pem ubuntu@${module.monitoring[0].public_ips[0]}" : "Not created"
   }
 }
 
@@ -532,10 +532,10 @@ module "rotation_lambda" {
   rotation_lambda_config = {
     enabled     = true
     name        = "${local.env.project_config.name}-rds-rotation"
-    runtime     = "python3.9" # TODO: update as needed
+    runtime     = "python3.9"                        # TODO: update as needed
     handler     = "postgres_rotation.lambda_handler" # TODO: update as needed
-    timeout     = 30 # TODO: update as needed
-    memory_size = 128 # TODO: update as needed
+    timeout     = 30                                 # TODO: update as needed
+    memory_size = 128                                # TODO: update as needed
   }
 }
 

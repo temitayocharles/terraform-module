@@ -18,6 +18,6 @@ DESC
       environment = string
     })
     enable_instance_profiles = bool
-    names = map(string)
+    names                    = map(string)
   })
 }

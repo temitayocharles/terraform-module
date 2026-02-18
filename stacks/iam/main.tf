@@ -1,11 +1,14 @@
 locals {
-  env         = yamldecode(file("${path.module}/../../resource/environment.yaml"))
-  iam_config  = local.env.iam_config
-  oidc_config = try(local.env.oidc_config, null)
+  env        = yamldecode(file("${path.module}/../../resource/environment.yaml"))
+  iam_config = local.env.iam_config
+  oidc_config = try({
+    providers_config = try(local.env.oidc_config.providers_config, [])
+    region           = local.env.aws_config.region
+  }, null)
 }
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.6.0, < 2.0.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -24,7 +27,7 @@ module "iam" {
 }
 
 module "oidc" {
-  count       = local.oidc_config != null ? 1 : 0
+  count       = local.oidc_config != null && length(local.oidc_config.providers_config) > 0 ? 1 : 0
   source      = "../../module/oidc"
   oidc_config = local.oidc_config
 }

@@ -1,6 +1,17 @@
 locals {
   env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
 
+  enabled = try(local.env.modules_enabled, {})
+
+  route53_acm_default = {
+    enabled        = false
+    domain_name    = "example.com"
+    hosted_zone_id = "Z000000000000"
+    github_org     = "placeholder"
+    github_repo    = "placeholder"
+    audiences      = ["sts.amazonaws.com"]
+  }
+
   configs = {
     s3            = try(local.env.s3_config, null)
     kms           = try(local.env.kms_config, null)
@@ -9,10 +20,12 @@ locals {
     observability = try(local.env.observability_config, null)
     route53_acm   = try(local.env.route53_acm_config, null)
   }
+
+  route53_acm_merged = merge(local.route53_acm_default, try(local.configs.route53_acm, {}))
 }
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.6.0, < 2.0.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -56,9 +69,9 @@ module "observability" {
 }
 
 module "route53_acm" {
-  count              = local.configs.route53_acm != null && local.configs.route53_acm.enabled ? 1 : 0
+  count              = try(local.enabled.route53_acm, false) && local.route53_acm_merged.enabled ? 1 : 0
   source             = "../../module/route53_acm"
-  route53_acm_config = local.configs.route53_acm
+  route53_acm_config = local.route53_acm_merged
 }
 
 output "s3_bucket_name" {

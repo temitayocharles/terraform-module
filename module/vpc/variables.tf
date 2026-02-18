@@ -11,7 +11,7 @@ project_config: Object containing project-level metadata for tagging and naming.
 cidr: The CIDR block for the VPC (e.g., '10.0.0.0/16'). User must set this to match their network plan.
 DESC
   type = object({
-    enabled = bool
+    enabled = optional(bool, false)
     project_config = object({
       name        = string
       environment = string

@@ -1,6 +1,21 @@
 locals {
   env = yamldecode(file("${path.module}/../../resource/environment.yaml"))
 
+  enabled = try(local.env.modules_enabled, {})
+
+  sg_config_default = {
+    vpc_id                = "vpc-00000000"
+    create_before_destroy = false
+    config = {
+      security_group_name        = "placeholder-sg"
+      security_group_description = "placeholder"
+      tags                       = {}
+      allow_all                  = false
+      inbound_rules              = []
+      outbound_rules             = []
+    }
+  }
+
   sg_configs = {
     jenkins    = try(local.env.jenkins_sg_config, null)
     k8s_master = try(local.env.k8s_master_sg_config, null)
@@ -11,7 +26,7 @@ locals {
 }
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.6.0, < 2.0.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -25,33 +40,33 @@ provider "aws" {
 }
 
 module "jenkins_sg" {
-  count             = local.sg_configs.jenkins != null ? 1 : 0
+  count             = try(local.enabled.jenkins_sg, false) && local.sg_configs.jenkins != null ? 1 : 0
   source            = "../../module/sg-dynamic"
-  sg_dynamic_config = local.sg_configs.jenkins
+  sg_dynamic_config = try(local.enabled.jenkins_sg, false) ? local.sg_configs.jenkins : local.sg_config_default
 }
 
 module "k8s_master_sg" {
-  count             = local.sg_configs.k8s_master != null ? 1 : 0
+  count             = try(local.enabled.k8s_master_sg, false) && local.sg_configs.k8s_master != null ? 1 : 0
   source            = "../../module/sg-dynamic"
-  sg_dynamic_config = local.sg_configs.k8s_master
+  sg_dynamic_config = try(local.enabled.k8s_master_sg, false) ? local.sg_configs.k8s_master : local.sg_config_default
 }
 
 module "k8s_worker_sg" {
-  count             = local.sg_configs.k8s_worker != null ? 1 : 0
+  count             = try(local.enabled.k8s_worker_sg, false) && local.sg_configs.k8s_worker != null ? 1 : 0
   source            = "../../module/sg-dynamic"
-  sg_dynamic_config = local.sg_configs.k8s_worker
+  sg_dynamic_config = try(local.enabled.k8s_worker_sg, false) ? local.sg_configs.k8s_worker : local.sg_config_default
 }
 
 module "tools_sg" {
-  count             = local.sg_configs.tools != null ? 1 : 0
+  count             = try(local.enabled.tools_sg, false) && local.sg_configs.tools != null ? 1 : 0
   source            = "../../module/sg-dynamic"
-  sg_dynamic_config = local.sg_configs.tools
+  sg_dynamic_config = try(local.enabled.tools_sg, false) ? local.sg_configs.tools : local.sg_config_default
 }
 
 module "monitoring_sg" {
-  count             = local.sg_configs.monitoring != null ? 1 : 0
+  count             = try(local.enabled.monitoring_sg, false) && local.sg_configs.monitoring != null ? 1 : 0
   source            = "../../module/sg-dynamic"
-  sg_dynamic_config = local.sg_configs.monitoring
+  sg_dynamic_config = try(local.enabled.monitoring_sg, false) ? local.sg_configs.monitoring : local.sg_config_default
 }
 
 output "jenkins_sg_id" {

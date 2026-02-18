@@ -1,6 +1,6 @@
 
 output "asg_name" {
-    value       = var.autoscaling_config.enabled ? aws_autoscaling_group.this[0].name : ""
+  value       = var.autoscaling_config.enabled ? aws_autoscaling_group.this[0].name : ""
   description = "AutoScaling Group name when enabled"
 }
 
