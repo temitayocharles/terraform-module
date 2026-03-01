@@ -61,3 +61,8 @@ Each module has its own README under [`module/`](./module).
 ## Architecture Maps
 - [DEPENDENCY_LADDER.md](./DEPENDENCY_LADDER.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+
+## Argo CD Bootstrap
+- `module/argocd-bootstrap` installs Argo CD and creates the root GitOps handoff.
+- The caller chooses cluster access mode (`eks` or `kubeconfig`) so the same bootstrap design works for cloud and local clusters.

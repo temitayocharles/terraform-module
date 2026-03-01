@@ -260,7 +260,10 @@ observability_config:
 
 argocd_bootstrap_config:
   enabled: false
+  auth_mode: "eks"
   cluster_name: ""
+  kubeconfig_path: "~/.kube/config"
+  kubeconfig_context: ""
   namespace: "argocd"
   helm_repo: "https://argoproj.github.io/argo-helm"
   chart_version: "7.7.16"
