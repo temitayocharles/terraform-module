@@ -154,7 +154,7 @@ resource "terraform_data" "argocd_crd_bootstrap" {
     auth_mode                 = var.kubectl_config.auth_mode
     kubeconfig_path           = try(var.kubectl_config.kubeconfig_path, "")
     kubeconfig_context        = try(var.kubectl_config.kubeconfig_context, "")
-    host                      = try(var.kubectl_config.host, "")
+    host                      = coalesce(try(var.kubectl_config.host, null), "")
   }
 
   provisioner "local-exec" {
@@ -176,8 +176,8 @@ apiVersion: v1
 kind: Config
 clusters:
 - cluster:
-    server: ${try(var.kubectl_config.host, "")}
-    certificate-authority-data: ${try(base64encode(var.kubectl_config.cluster_ca_certificate), "")}
+    server: ${coalesce(try(var.kubectl_config.host, null), "")}
+    certificate-authority-data: ${base64encode(coalesce(try(var.kubectl_config.cluster_ca_certificate, null), ""))}
   name: bootstrap-cluster
 contexts:
 - context:
@@ -188,7 +188,7 @@ current-context: bootstrap-context
 users:
 - name: bootstrap-user
   user:
-    token: ${try(var.kubectl_config.token, "")}
+    token: ${coalesce(try(var.kubectl_config.token, null), "")}
 KUBECONFIG
         export KUBECONFIG="$tmpdir/kubeconfig"
         KUBECTL_CONTEXT_ARG=""
