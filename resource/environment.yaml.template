@@ -270,7 +270,7 @@ argocd_bootstrap_config:
   release_name: "argocd"
   helm_values: {}
   project_name: "platform-tools"
-  project_description: "Core platform infrastructure (Vault, External Secrets, Argo CD, Cert-Manager, Traefik, Vault access)"
+  project_description: "Core platform infrastructure (Vault, External Secrets, Argo CD, Cert-Manager, Traefik, MinIO, Vault access)"
   project_source_repos:
     - "https://github.com/temitayocharles/platform-gitops.git"
     - "https://github.com/temitayocharles/helm-charts.git"
