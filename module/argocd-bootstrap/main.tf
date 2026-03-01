@@ -129,27 +129,25 @@ resource "helm_release" "argocd" {
   depends_on = [kubernetes_namespace_v1.argocd]
 }
 
-resource "kubernetes_manifest" "repository_secret" {
+resource "kubernetes_secret_v1" "repository_secret" {
   for_each = local.enabled ? local.repo_credentials : {}
 
-  manifest = {
-    apiVersion = "v1"
-    kind       = "Secret"
-    metadata = {
-      name      = "argocd-repo-${each.key}"
-      namespace = local.namespace
-      labels = {
-        "argocd.argoproj.io/secret-type" = "repository"
-      }
+  metadata {
+    name      = "argocd-repo-${each.key}"
+    namespace = local.namespace
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repository"
     }
-    type = "Opaque"
-    stringData = {
-      name     = each.value.name
-      type     = try(each.value.type, "git")
-      url      = each.value.url
-      username = each.value.username
-      password = lookup(var.repo_passwords, each.key, "")
-    }
+  }
+
+  type = "Opaque"
+
+  data = {
+    name     = base64encode(each.value.name)
+    type     = base64encode(try(each.value.type, "git"))
+    url      = base64encode(each.value.url)
+    username = base64encode(each.value.username)
+    password = base64encode(lookup(var.repo_passwords, each.key, ""))
   }
 
   depends_on = [helm_release.argocd]
@@ -220,6 +218,6 @@ YAML
 
   depends_on = [
     helm_release.argocd,
-    kubernetes_manifest.repository_secret
+    kubernetes_secret_v1.repository_secret
   ]
 }
