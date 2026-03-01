@@ -56,3 +56,22 @@ variable "repo_passwords" {
   default     = {}
   sensitive   = true
 }
+
+
+variable "kubectl_config" {
+  description = <<DESC
+Configuration for applying Argo CRD resources after the Helm release installs the CRDs.
+
+For kubeconfig mode, supply kubeconfig_path and optionally kubeconfig_context.
+For direct mode (for example EKS-derived auth), supply host, cluster_ca_certificate, and token.
+DESC
+
+  type = object({
+    auth_mode              = string
+    kubeconfig_path        = optional(string)
+    kubeconfig_context     = optional(string)
+    host                   = optional(string)
+    cluster_ca_certificate = optional(string)
+    token                  = optional(string)
+  })
+}
