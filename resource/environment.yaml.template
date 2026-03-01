@@ -34,6 +34,7 @@ modules_enabled:
   route53_acm: false
   efs: false
   ecr: false
+  argocd_bootstrap: false
 
 remote_state:
   vpc:
@@ -256,6 +257,58 @@ kms_config:
 observability_config:
   enabled: false
   log_group_prefix: ""
+
+argocd_bootstrap_config:
+  enabled: false
+  cluster_name: ""
+  namespace: "argocd"
+  helm_repo: "https://argoproj.github.io/argo-helm"
+  chart_version: "7.7.16"
+  release_name: "argocd"
+  helm_values: {}
+  project_name: "platform-tools"
+  project_description: "Core platform infrastructure (Vault, External Secrets, Argo CD, Cert-Manager, Traefik, Vault access)"
+  project_source_repos:
+    - "https://github.com/temitayocharles/platform-gitops.git"
+    - "https://github.com/temitayocharles/helm-charts.git"
+    - "https://github.com/temitayocharles/vault-ops.git"
+    - "https://helm.hashicorp.com"
+    - "https://argoproj.github.io/argo-helm"
+    - "https://traefik.github.io/charts"
+    - "https://external-secrets.io"
+    - "https://charts.jetstack.io"
+  project_destinations:
+    - namespace: "vault"
+      server: "https://kubernetes.default.svc"
+    - namespace: "vault-admin"
+      server: "https://kubernetes.default.svc"
+    - namespace: "external-secrets"
+      server: "https://kubernetes.default.svc"
+    - namespace: "argocd"
+      server: "https://kubernetes.default.svc"
+    - namespace: "traefik"
+      server: "https://kubernetes.default.svc"
+    - namespace: "cert-manager"
+      server: "https://kubernetes.default.svc"
+  root_application_name: "platform-root"
+  root_repo_url: "https://github.com/temitayocharles/platform-gitops.git"
+  root_target_revision: "main"
+  root_path: "infrastructure"
+  root_destination_server: "https://kubernetes.default.svc"
+  root_destination_namespace: "argocd"
+  repositories:
+    - name: "platform-gitops"
+      url: "https://github.com/temitayocharles/platform-gitops.git"
+      username: "temitayocharles"
+    - name: "helm-charts"
+      url: "https://github.com/temitayocharles/helm-charts.git"
+      username: "temitayocharles"
+    - name: "configurations"
+      url: "https://github.com/temitayocharles/configurations.git"
+      username: "temitayocharles"
+    - name: "vault-ops"
+      url: "https://github.com/temitayocharles/vault-ops.git"
+      username: "temitayocharles"
 
 route53_acm_config:
   enabled: false

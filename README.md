@@ -10,7 +10,7 @@ Modular AWS infrastructure with stack-by-stack deployment support.
 ## Repository Layout
 ```text
 module/      Reusable Terraform modules
-stacks/      Stack entrypoints (vpc, iam, security, compute, database, storage)
+stacks/      Stack entrypoints (vpc, iam, security, compute, bootstrap, database, storage)
 resource/    Combined/legacy root deployment
 scripts/     Bootstrap scripts for provisioned hosts
 ```
@@ -20,8 +20,9 @@ scripts/     Bootstrap scripts for provisioned hosts
 2. [`stacks/iam`](./stacks/iam)
 3. [`stacks/security`](./stacks/security)
 4. [`stacks/compute`](./stacks/compute)
-5. [`stacks/database`](./stacks/database)
-6. [`stacks/storage`](./stacks/storage)
+5. [`stacks/bootstrap`](./stacks/bootstrap)
+6. [`stacks/database`](./stacks/database)
+7. [`stacks/storage`](./stacks/storage)
 
 ## Quick Start
 ```bash
