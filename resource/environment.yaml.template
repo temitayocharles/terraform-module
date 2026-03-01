@@ -280,6 +280,7 @@ argocd_bootstrap_config:
     - "https://traefik.github.io/charts"
     - "https://external-secrets.io"
     - "https://charts.jetstack.io"
+    - "https://charts.min.io/"
   project_destinations:
     - namespace: "vault"
       server: "https://kubernetes.default.svc"
@@ -292,6 +293,8 @@ argocd_bootstrap_config:
     - namespace: "traefik"
       server: "https://kubernetes.default.svc"
     - namespace: "cert-manager"
+      server: "https://kubernetes.default.svc"
+    - namespace: "minio"
       server: "https://kubernetes.default.svc"
   root_application_name: "platform-root"
   root_repo_url: "https://github.com/temitayocharles/platform-gitops.git"

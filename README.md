@@ -66,3 +66,5 @@ Each module has its own README under [`module/`](./module).
 ## Argo CD Bootstrap
 - `module/argocd-bootstrap` installs Argo CD and creates the root GitOps handoff.
 - The caller chooses cluster access mode (`eks` or `kubeconfig`) so the same bootstrap design works for cloud and local clusters.
+- The module is intentionally limited to bootstrap primitives only.
+- Runtime platform tools such as Vault, Traefik, External Secrets, MinIO, and observability stay under GitOps ownership after bootstrap.

@@ -103,14 +103,6 @@ locals {
   }
 }
 
-resource "kubernetes_namespace_v1" "argocd" {
-  count = local.enabled ? 1 : 0
-
-  metadata {
-    name = local.namespace
-  }
-}
-
 resource "helm_release" "argocd" {
   count = local.enabled ? 1 : 0
 
@@ -119,14 +111,12 @@ resource "helm_release" "argocd" {
   chart            = "argo-cd"
   version          = var.argocd_bootstrap_config.chart_version
   namespace        = local.namespace
-  create_namespace = false
+  create_namespace = true
   wait             = true
   atomic           = true
   timeout          = 600
   cleanup_on_fail  = true
   values           = local.helm_values
-
-  depends_on = [kubernetes_namespace_v1.argocd]
 }
 
 resource "kubernetes_secret_v1" "repository_secret" {
